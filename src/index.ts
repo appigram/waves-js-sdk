@@ -10,13 +10,8 @@ import tools from './tools'
 import * as request from "./utils/request"
 import {TransactionsType, Transactions} from './api/transactions/transactionsV2'
 import { TransactionPublicServiceClient as TransactionServiceClientWeb } from './grpc/compiled-web/transaction/transaction_public_service_grpc_web_pb'
-import isNode from './utils/isNode'
 
 let TransactionServiceClient = TransactionServiceClientWeb
-
-if (isNode) {
-  TransactionServiceClient = require('./grpc/compiled-node/transaction/transaction_public_service_grpc_pb').TransactionPublicServiceClient
-}
 
 
 export interface IWeSdkCtr {
@@ -76,21 +71,13 @@ export class WeSdk {
   }
 
   setGrpcService(address: string) {
-    if (isNode) {
-      this.grpcService = new TransactionServiceClient(
-        address,
-        // tslint:disable-next-line:no-eval
-        eval('require')('@grpc/grpc-js').credentials.createInsecure()
-      )
-    } else {
-      const enableDevTools = (window as any).__GRPCWEB_DEVTOOLS__ || (() => null)
-      this.grpcService = new TransactionServiceClient(
-        address
-      )
-      enableDevTools([
-        this.grpcService,
-      ])
-    }
+    const enableDevTools = (window as any).__GRPCWEB_DEVTOOLS__ || (() => null)
+    this.grpcService = new TransactionServiceClient(
+      address
+    )
+    enableDevTools([
+      this.grpcService,
+    ])
   }
 
 }
